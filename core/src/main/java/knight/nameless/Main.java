@@ -2,6 +2,7 @@ package knight.nameless;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Color;
@@ -42,8 +43,8 @@ public class Main extends ApplicationAdapter {
         shapeRenderer = new ShapeRenderer();
         controller = Controllers.getCurrent();
 
-        rectangle = new Rectangle(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 64, 64);
-        ball = new Rectangle(SCREEN_WIDTH / 2f + 100, SCREEN_HEIGHT / 2f, 32, 32);
+        rectangle = new Rectangle(100, 100, 64, 64);
+        ball = new Rectangle(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 32, 32);
         ballVelocity = new Vector2(300, 300);
 
         scoreNumbers = loadNumbersTextureRegion();
@@ -77,11 +78,39 @@ public class Main extends ApplicationAdapter {
         final float positionY = SCREEN_HEIGHT - 70;
         var spaceBetweenNumbers = scoreNumbers[0].getRegionWidth() * 2 - 10;
 
+        if (number < 0) {
+
+            batch.draw(scoreNumbers[0], positionX, positionY, width, height);
+            return;
+        }
+
         if (number > 999) {
 
-            batch.draw(scoreNumbers[9], positionX, positionY, width, height);
-            batch.draw(scoreNumbers[9], positionX + spaceBetweenNumbers, positionY, width, height);
-            batch.draw(scoreNumbers[9], positionX + spaceBetweenNumbers * 2, positionY, width, height);
+            int thousand = number / 1000;
+            int thousandUnits = number % 1000;
+
+            int hundred = number / 100;
+            int hundredUnits = number % 100;
+
+            batch.draw(scoreNumbers[thousand], positionX, positionY, width, height);
+
+            if (thousandUnits < 10) {
+
+                batch.draw(scoreNumbers[0], positionX + spaceBetweenNumbers, positionY, width, height);
+                batch.draw(scoreNumbers[0], positionX + spaceBetweenNumbers * 2, positionY, width, height);
+                batch.draw(scoreNumbers[thousandUnits], positionX + spaceBetweenNumbers * 3, positionY, width, height);
+            }
+            else {
+
+                int hundredTens = thousandUnits / 10;
+                int units = thousandUnits % 10;
+
+                batch.draw(scoreNumbers[0], positionX + spaceBetweenNumbers, positionY, width, height);
+                batch.draw(scoreNumbers[hundredTens], positionX + spaceBetweenNumbers * 2, positionY, width, height);
+                batch.draw(scoreNumbers[units], positionX + spaceBetweenNumbers * 3, positionY, width, height);
+            }
+
+
         } else if (number < 10) {
 
             batch.draw(scoreNumbers[number], positionX + spaceBetweenNumbers * 2, positionY, width, height);
@@ -111,8 +140,10 @@ public class Main extends ApplicationAdapter {
 
     private void update(float deltaTime) {
 
+        keyboardControllers(deltaTime);
+
         if (controller != null)
-            joystickControllers();
+            joystickControllers(deltaTime);
 
         if (ball.x < 0 || ball.x > SCREEN_WIDTH - ball.width)
         {
@@ -126,7 +157,7 @@ public class Main extends ApplicationAdapter {
             colorIndex = MathUtils.random(0, colors.length - 1);
         }
 
-        // Check collision between a two rectangles.
+        // Check collision between two rectangles.
         if (rectangle.overlaps(ball))
         {
             ballVelocity.scl(-1);
@@ -140,19 +171,41 @@ public class Main extends ApplicationAdapter {
         ball.y += ballVelocity.y * deltaTime;
     }
 
-    private void joystickControllers() {
+    private void keyboardControllers(float deltaTime) {
+
+        final int playerSpeed = 600;
+
+        if (Gdx.app.getInput().isKeyPressed(Input.Keys.W) && rectangle.x < SCREEN_WIDTH - rectangle.width)
+            rectangle.y += playerSpeed * deltaTime;
+
+        if (Gdx.app.getInput().isKeyPressed(Input.Keys.S) && rectangle.x > 0)
+            rectangle.y -= playerSpeed * deltaTime;
+
+        if (Gdx.app.getInput().isKeyPressed(Input.Keys.D) && rectangle.y < SCREEN_HEIGHT - rectangle.height)
+            rectangle.x += playerSpeed * deltaTime;
+
+        if (Gdx.app.getInput().isKeyPressed(Input.Keys.A) && rectangle.y > 0)
+            rectangle.x -= playerSpeed * deltaTime;
+
+        if (Gdx.app.getInput().isKeyPressed(Input.Keys.Q))
+            rectangle.setPosition(0, 0);
+    }
+
+    private void joystickControllers(float deltaTime) {
+
+        final int playerSpeed = 600;
+
+        if (controller.getButton(controller.getMapping().buttonDpadUp) && rectangle.y < SCREEN_HEIGHT - rectangle.height)
+            rectangle.y += playerSpeed * deltaTime;
+
+        if (controller.getButton(controller.getMapping().buttonDpadDown) && rectangle.y > 0)
+            rectangle.y -= playerSpeed * deltaTime;
 
         if (controller.getButton(controller.getMapping().buttonDpadRight) && rectangle.x < SCREEN_WIDTH - rectangle.width)
-            rectangle.x += 5;
+            rectangle.x += playerSpeed * deltaTime;
 
-        else if (controller.getButton(controller.getMapping().buttonDpadLeft) && rectangle.x > 0)
-            rectangle.x -= 5;
-
-        else if (controller.getButton(controller.getMapping().buttonDpadUp) && rectangle.y < SCREEN_HEIGHT - rectangle.height)
-            rectangle.y += 5;
-
-        else if (controller.getButton(controller.getMapping().buttonDpadDown) && rectangle.y > 0)
-            rectangle.y -= 5;
+        if (controller.getButton(controller.getMapping().buttonDpadLeft) && rectangle.x > 0)
+            rectangle.x -= playerSpeed * deltaTime;
 
         if (controller.getButton(controller.getMapping().buttonBack))
             rectangle.setPosition(0, 0);
@@ -170,7 +223,7 @@ public class Main extends ApplicationAdapter {
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        shapeRenderer.setColor(Color.RED);
+        shapeRenderer.setColor(Color.BLACK);
         shapeRenderer.rect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
 
         shapeRenderer.setColor(colors[colorIndex]);

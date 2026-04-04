@@ -7,8 +7,10 @@ import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -25,6 +27,7 @@ public class Main extends ApplicationAdapter {
     private Controller controller;
     private ShapeRenderer shapeRenderer;
     private SpriteBatch batch;
+    private Texture fontTexture;
     private BitmapFont font;
     private Rectangle rectangle;
     private Rectangle ball;
@@ -38,7 +41,9 @@ public class Main extends ApplicationAdapter {
     @Override
     public void create() {
 
-        font = new BitmapFont(Gdx.files.internal("fonts/test.fnt"));
+        fontTexture = new Texture("fonts/test.png");
+        fontTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        font = new BitmapFont(Gdx.files.internal("fonts/test.fnt"), new TextureRegion(fontTexture));
         font.getData().scale(2f);
 
         batch = new SpriteBatch();
@@ -175,6 +180,7 @@ public class Main extends ApplicationAdapter {
     @Override
     public void dispose() {
         font.dispose();
+        fontTexture.dispose();
         shapeRenderer.dispose();
         batch.dispose();
     }

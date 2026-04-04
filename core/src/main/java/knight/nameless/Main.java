@@ -3,6 +3,7 @@ package knight.nameless;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Color;
@@ -38,15 +39,18 @@ public class Main extends ApplicationAdapter {
     private int score;
     private final int playerSpeed = 600;
     private boolean shouldClearScreen = true;
+    private Sound sound;
 
     @Override
     public void create() {
 
-        texture = new Texture("img/alien_1.png");
+        texture = new Texture("img/redbird.png");
         fontTexture = new Texture("fonts/test.png");
         fontTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         font = new BitmapFont(Gdx.files.internal("fonts/test.fnt"), new TextureRegion(fontTexture));
         font.getData().scale(2f);
+
+        sound = Gdx.audio.newSound(Gdx.files.internal("sounds/magic.wav"));
 
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
@@ -104,9 +108,7 @@ public class Main extends ApplicationAdapter {
         {
             ballVelocity.scl(-1);
             score++;
-            colorIndex = MathUtils.random(0, colors.length - 1);
-
-//            PlaySound(hitSound);
+            sound.play();
         }
 
         ball.x += (int) ballVelocity.x * deltaTime;
@@ -178,6 +180,7 @@ public class Main extends ApplicationAdapter {
 
         batch.draw(texture, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         font.draw(batch,"(" + (int)rectangle.x + ", " + (int)rectangle.y + ")" ,450,SCREEN_HEIGHT - 50);
+        font.draw(batch, String.valueOf(score),200,SCREEN_HEIGHT - 50);
 
         batch.end();
     }
@@ -185,6 +188,7 @@ public class Main extends ApplicationAdapter {
     @Override
     public void dispose() {
         font.dispose();
+        sound.dispose();
         fontTexture.dispose();
         shapeRenderer.dispose();
         batch.dispose();

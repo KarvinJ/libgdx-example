@@ -28,6 +28,7 @@ public class Main extends ApplicationAdapter {
     private ShapeRenderer shapeRenderer;
     private SpriteBatch batch;
     private Texture fontTexture;
+    private Texture texture;
     private BitmapFont font;
     private Rectangle rectangle;
     private Rectangle ball;
@@ -41,6 +42,7 @@ public class Main extends ApplicationAdapter {
     @Override
     public void create() {
 
+        texture = new Texture("img/alien_1.png");
         fontTexture = new Texture("fonts/test.png");
         fontTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         font = new BitmapFont(Gdx.files.internal("fonts/test.fnt"), new TextureRegion(fontTexture));
@@ -50,8 +52,8 @@ public class Main extends ApplicationAdapter {
         shapeRenderer = new ShapeRenderer();
         controller = Controllers.getCurrent();
 
-        rectangle = new Rectangle(100, 100, 64, 64);
-        ball = new Rectangle(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 48, 48);
+        rectangle = new Rectangle(100, 100, texture.getWidth(), texture.getHeight());
+        ball = new Rectangle(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 32, 32);
         ballVelocity = new Vector2(400, 400);
 
         colors = new Color[]{Color.RED, Color.GREEN, Color.BLUE, Color.CORAL, Color.GOLD};
@@ -172,6 +174,7 @@ public class Main extends ApplicationAdapter {
         batch.setProjectionMatrix(viewport.getCamera().combined);
         batch.begin();
 
+        batch.draw(texture, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         font.draw(batch,"(" + (int)rectangle.x + ", " + (int)rectangle.y + ")" ,450,SCREEN_HEIGHT - 50);
 
         batch.end();

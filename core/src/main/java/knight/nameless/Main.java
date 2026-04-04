@@ -7,14 +7,13 @@ import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
@@ -30,26 +29,27 @@ public class Main extends ApplicationAdapter {
     private Rectangle rectangle;
     private Rectangle ball;
     private Vector2 ballVelocity;
-    private TextureRegion[] scoreNumbers;
     private Color[] colors;
     private int colorIndex;
     private int score;
+    private final int playerSpeed = 600;
+    private boolean shouldClearScreen = true;
 
     @Override
     public void create() {
 
-        font = new BitmapFont();
+        font = new BitmapFont(Gdx.files.internal("fonts/test.fnt"));
+        font.getData().scale(2f);
+
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         controller = Controllers.getCurrent();
 
         rectangle = new Rectangle(100, 100, 64, 64);
-        ball = new Rectangle(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 32, 32);
-        ballVelocity = new Vector2(300, 300);
+        ball = new Rectangle(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 48, 48);
+        ballVelocity = new Vector2(400, 400);
 
-        scoreNumbers = loadNumbersTextureRegion();
-
-        colors = new Color[]{Color.RED, Color.GREEN, Color.BLUE, Color.CORAL, Color.BLACK};
+        colors = new Color[]{Color.RED, Color.GREEN, Color.BLUE, Color.CORAL, Color.GOLD};
 
         camera = new OrthographicCamera();
         camera.position.set(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 0);
@@ -61,84 +61,17 @@ public class Main extends ApplicationAdapter {
         viewport.update(width, height);
     }
 
-    private TextureRegion[] loadNumbersTextureRegion() {
+    private void touchControllers() {
 
-        Texture textureToSplit = new Texture("numbers.png");
+        Vector3 worldCoordinates = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+        var mouseBounds = new Rectangle(worldCoordinates.x, worldCoordinates.y, 2, 2);
 
-        return TextureRegion.split(
-            textureToSplit, textureToSplit.getWidth() / 10,
-            textureToSplit.getHeight()
-        )[0];
+        if (Gdx.input.isTouched())
+            rectangle.setPosition(mouseBounds.x, mouseBounds.y);
     }
-
-    private void drawNumbers(SpriteBatch batch, int number, float positionX) {
-
-        final float width = 48;
-        final float height = 64;
-        final float positionY = SCREEN_HEIGHT - 70;
-        var spaceBetweenNumbers = scoreNumbers[0].getRegionWidth() * 2 - 10;
-
-        if (number < 0) {
-
-            batch.draw(scoreNumbers[0], positionX, positionY, width, height);
-            return;
-        }
-
-        if (number > 999) {
-
-            int thousand = number / 1000;
-            int thousandUnits = number % 1000;
-
-            int hundred = number / 100;
-            int hundredUnits = number % 100;
-
-            batch.draw(scoreNumbers[thousand], positionX, positionY, width, height);
-
-            if (thousandUnits < 10) {
-
-                batch.draw(scoreNumbers[0], positionX + spaceBetweenNumbers, positionY, width, height);
-                batch.draw(scoreNumbers[0], positionX + spaceBetweenNumbers * 2, positionY, width, height);
-                batch.draw(scoreNumbers[thousandUnits], positionX + spaceBetweenNumbers * 3, positionY, width, height);
-            }
-            else {
-
-                int hundredTens = thousandUnits / 10;
-                int units = thousandUnits % 10;
-
-                batch.draw(scoreNumbers[0], positionX + spaceBetweenNumbers, positionY, width, height);
-                batch.draw(scoreNumbers[hundredTens], positionX + spaceBetweenNumbers * 2, positionY, width, height);
-                batch.draw(scoreNumbers[units], positionX + spaceBetweenNumbers * 3, positionY, width, height);
-            }
-
-
-        } else if (number < 10) {
-
-            batch.draw(scoreNumbers[number], positionX + spaceBetweenNumbers * 2, positionY, width, height);
-
-        } else {
-
-            int hundred = number / 100;
-            int hundredUnits = number % 100;
-
-            if (hundred > 0)
-                batch.draw(scoreNumbers[hundred], positionX, positionY, width, height);
-
-            if (hundredUnits < 10) {
-
-                batch.draw(scoreNumbers[0], positionX + spaceBetweenNumbers, positionY, width, height);
-                batch.draw(scoreNumbers[hundredUnits], positionX + spaceBetweenNumbers * 2, positionY, width, height);
-            } else {
-
-                int hundredTens = hundredUnits / 10;
-                int units = hundredUnits % 10;
-
-                batch.draw(scoreNumbers[hundredTens], positionX + spaceBetweenNumbers, positionY, width, height);
-                batch.draw(scoreNumbers[units], positionX + spaceBetweenNumbers * 2, positionY, width, height);
-            }
-        }
-    }
-
     private void update(float deltaTime) {
+
+        touchControllers();
 
         keyboardControllers(deltaTime);
 
@@ -167,24 +100,22 @@ public class Main extends ApplicationAdapter {
 //            PlaySound(hitSound);
         }
 
-        ball.x += ballVelocity.x * deltaTime;
-        ball.y += ballVelocity.y * deltaTime;
+        ball.x += (int) ballVelocity.x * deltaTime;
+        ball.y += (int) ballVelocity.y * deltaTime;
     }
 
     private void keyboardControllers(float deltaTime) {
 
-        final int playerSpeed = 600;
-
-        if (Gdx.app.getInput().isKeyPressed(Input.Keys.W) && rectangle.x < SCREEN_WIDTH - rectangle.width)
+        if (Gdx.app.getInput().isKeyPressed(Input.Keys.W) && rectangle.y < SCREEN_HEIGHT - rectangle.height)
             rectangle.y += playerSpeed * deltaTime;
 
-        if (Gdx.app.getInput().isKeyPressed(Input.Keys.S) && rectangle.x > 0)
+        if (Gdx.app.getInput().isKeyPressed(Input.Keys.S) && rectangle.y > 0)
             rectangle.y -= playerSpeed * deltaTime;
 
-        if (Gdx.app.getInput().isKeyPressed(Input.Keys.D) && rectangle.y < SCREEN_HEIGHT - rectangle.height)
+        if (Gdx.app.getInput().isKeyPressed(Input.Keys.D) && rectangle.x < SCREEN_WIDTH - rectangle.width)
             rectangle.x += playerSpeed * deltaTime;
 
-        if (Gdx.app.getInput().isKeyPressed(Input.Keys.A) && rectangle.y > 0)
+        if (Gdx.app.getInput().isKeyPressed(Input.Keys.A) && rectangle.x > 0)
             rectangle.x -= playerSpeed * deltaTime;
 
         if (Gdx.app.getInput().isKeyPressed(Input.Keys.Q))
@@ -192,8 +123,6 @@ public class Main extends ApplicationAdapter {
     }
 
     private void joystickControllers(float deltaTime) {
-
-        final int playerSpeed = 600;
 
         if (controller.getButton(controller.getMapping().buttonDpadUp) && rectangle.y < SCREEN_HEIGHT - rectangle.height)
             rectangle.y += playerSpeed * deltaTime;
@@ -209,6 +138,9 @@ public class Main extends ApplicationAdapter {
 
         if (controller.getButton(controller.getMapping().buttonBack))
             rectangle.setPosition(0, 0);
+
+        if (controller.getButton(controller.getMapping().buttonLeftStick))
+            shouldClearScreen = !shouldClearScreen;
     }
 
     @Override
@@ -218,12 +150,13 @@ public class Main extends ApplicationAdapter {
 
         update(deltaTime);
 
-        ScreenUtils.clear(Color.LIGHT_GRAY);
+        if (shouldClearScreen)
+            ScreenUtils.clear(Color.BLACK);
 
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        shapeRenderer.setColor(Color.BLACK);
+        shapeRenderer.setColor(Color.WHITE);
         shapeRenderer.rect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
 
         shapeRenderer.setColor(colors[colorIndex]);
@@ -234,8 +167,7 @@ public class Main extends ApplicationAdapter {
         batch.setProjectionMatrix(viewport.getCamera().combined);
         batch.begin();
 
-        drawNumbers(batch, (int) rectangle.x, SCREEN_WIDTH / 2f - 128);
-        drawNumbers(batch, (int) rectangle.y, SCREEN_WIDTH / 2f);
+        font.draw(batch,"(" + (int)rectangle.x + ", " + (int)rectangle.y + ")" ,450,SCREEN_HEIGHT - 50);
 
         batch.end();
     }

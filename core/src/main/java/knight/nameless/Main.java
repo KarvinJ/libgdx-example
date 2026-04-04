@@ -82,8 +82,10 @@ public class Main extends ApplicationAdapter {
 
         keyboardControllers(deltaTime);
 
-        if (controller != null)
+        if (controller != null && controller.isConnected())
             joystickControllers(deltaTime);
+        else
+            controller = Controllers.getCurrent();
 
         if (ball.x < 0 || ball.x > SCREEN_WIDTH - ball.width)
         {

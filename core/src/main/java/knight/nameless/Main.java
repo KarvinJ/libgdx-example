@@ -41,6 +41,7 @@ public class Main extends ApplicationAdapter {
     private boolean shouldClearScreen = true;
     private Sound sound;
     private int gameState;
+    private boolean isGamePaused;
 
     @Override
     public void create() {
@@ -173,7 +174,11 @@ public class Main extends ApplicationAdapter {
 
         float deltaTime = Gdx.graphics.getDeltaTime();
 
-        update(deltaTime);
+        if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.ENTER))
+            isGamePaused = !isGamePaused;
+
+        if (!isGamePaused)
+            update(deltaTime);
 
         if (shouldClearScreen)
             ScreenUtils.clear(Color.BLACK);
@@ -206,6 +211,9 @@ public class Main extends ApplicationAdapter {
 
         if (gameState >= 2)
             font.draw(batch, String.valueOf(score),200,SCREEN_HEIGHT - 50);
+
+        if (isGamePaused)
+            font.draw(batch, "Game Paused",350,SCREEN_HEIGHT / 2f);
 
         batch.end();
     }

@@ -40,6 +40,7 @@ public class Main extends ApplicationAdapter {
     private final int playerSpeed = 600;
     private boolean shouldClearScreen = true;
     private Sound sound;
+    private int gameState;
 
     @Override
     public void create() {
@@ -111,11 +112,27 @@ public class Main extends ApplicationAdapter {
             sound.play();
         }
 
-        ball.x += (int) ballVelocity.x * deltaTime;
-        ball.y += (int) ballVelocity.y * deltaTime;
+        if (gameState >= 2) {
+
+            ball.x += ballVelocity.x * deltaTime;
+            ball.y += ballVelocity.y * deltaTime;
+        }
+
     }
 
     private void keyboardControllers(float deltaTime) {
+
+        if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.F2) && gameState < 7)
+            gameState++;
+
+        if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.F1) && gameState > -1)
+            gameState--;
+
+        if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.Q))
+            rectangle.setPosition(0, 0);
+
+        if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.SPACE))
+            shouldClearScreen = !shouldClearScreen;
 
         if (Gdx.app.getInput().isKeyPressed(Input.Keys.W) && rectangle.y < SCREEN_HEIGHT - rectangle.height)
             rectangle.y += playerSpeed * deltaTime;
@@ -128,9 +145,6 @@ public class Main extends ApplicationAdapter {
 
         if (Gdx.app.getInput().isKeyPressed(Input.Keys.A) && rectangle.x > 0)
             rectangle.x -= playerSpeed * deltaTime;
-
-        if (Gdx.app.getInput().isKeyPressed(Input.Keys.Q))
-            rectangle.setPosition(0, 0);
     }
 
     private void joystickControllers(float deltaTime) {
@@ -167,20 +181,31 @@ public class Main extends ApplicationAdapter {
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        shapeRenderer.setColor(Color.WHITE);
-        shapeRenderer.rect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        if (gameState <= 2) {
 
-        shapeRenderer.setColor(colors[colorIndex]);
-        shapeRenderer.rect(ball.x, ball.y, ball.width, ball.height);
+            shapeRenderer.setColor(Color.WHITE);
+            shapeRenderer.rect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        }
+
+        if (gameState >= 2) {
+
+            shapeRenderer.setColor(colors[colorIndex]);
+            shapeRenderer.rect(ball.x, ball.y, ball.width, ball.height);
+        }
 
         shapeRenderer.end();
 
         batch.setProjectionMatrix(viewport.getCamera().combined);
         batch.begin();
 
-        batch.draw(texture, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
-        font.draw(batch,"(" + (int)rectangle.x + ", " + (int)rectangle.y + ")" ,450,SCREEN_HEIGHT - 50);
-        font.draw(batch, String.valueOf(score),200,SCREEN_HEIGHT - 50);
+        if (gameState > 2)
+            batch.draw(texture, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+
+        if (gameState == 1)
+            font.draw(batch,"(" + (int)rectangle.x + ", " + (int)rectangle.y + ")" ,450,SCREEN_HEIGHT - 50);
+
+        if (gameState >= 2)
+            font.draw(batch, String.valueOf(score),200,SCREEN_HEIGHT - 50);
 
         batch.end();
     }

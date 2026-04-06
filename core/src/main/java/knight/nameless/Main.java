@@ -9,7 +9,6 @@ import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -18,7 +17,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
@@ -32,13 +30,8 @@ public class Main extends ApplicationAdapter {
     private ShapeRenderer shapeRenderer;
     private SpriteBatch batch;
     private Texture fontTexture;
-    private TextureRegion playerRegion;
-    private TextureRegion birdsRegion;
-    private TextureRegion reimuRegion;
-    private Animation<TextureRegion> birdsAnimation;
-    private Animation<TextureRegion> reimuAnimation;
+    private Player player;
     private BitmapFont font;
-    private Rectangle rectangle;
     private Rectangle ball;
     private Vector2 ballVelocity;
     private Color[] colors;
@@ -49,18 +42,10 @@ public class Main extends ApplicationAdapter {
     private Sound sound;
     private int gameState;
     private boolean isGamePaused;
-    private float animationTimer;
 
     @Override
     public void create() {
 
-        reimuRegion = new TextureRegion(new Texture("img/reimu-spritesheet.png"));
-        birdsRegion = new TextureRegion(new Texture("img/red-bird-sprites.png"));
-
-        birdsAnimation = makeAnimationByTotalFrames(birdsRegion, 3);
-        reimuAnimation = makeAnimationByTotalFrames(reimuRegion, 8);
-
-        playerRegion = new TextureRegion(new Texture("img/redbird.png"));
         fontTexture = new Texture("fonts/test.png");
         fontTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         font = new BitmapFont(Gdx.files.internal("fonts/test.fnt"), new TextureRegion(fontTexture));
@@ -68,11 +53,12 @@ public class Main extends ApplicationAdapter {
 
         sound = Gdx.audio.newSound(Gdx.files.internal("sounds/magic.wav"));
 
+        player = new Player(100, 100, "img/redbird.png");
+
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         controller = Controllers.getCurrent();
 
-        rectangle = new Rectangle(100, 100, playerRegion.getRegionWidth(), playerRegion.getRegionHeight());
         ball = new Rectangle(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 32, 32);
         ballVelocity = new Vector2(400, 400);
 
@@ -81,18 +67,6 @@ public class Main extends ApplicationAdapter {
         camera = new OrthographicCamera();
         camera.position.set(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 0);
         viewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT, camera);
-    }
-
-    private Animation<TextureRegion> makeAnimationByTotalFrames(TextureRegion region, int totalFrames) {
-
-        int textureWidth = region.getRegionWidth() / totalFrames;
-
-        Array<TextureRegion> animationFrames = new Array<>();
-
-        for (int i = 0; i < totalFrames; i++)
-            animationFrames.add(new TextureRegion(region, i * textureWidth, 0, textureWidth, region.getRegionHeight()));
-
-        return new Animation<>(0.2f, animationFrames);
     }
 
     @Override
@@ -106,9 +80,11 @@ public class Main extends ApplicationAdapter {
         var mouseBounds = new Rectangle(worldCoordinates.x, worldCoordinates.y, 2, 2);
 
         if (Gdx.input.isTouched())
-            rectangle.setPosition(mouseBounds.x, mouseBounds.y);
+            player.bounds.setPosition(mouseBounds.x, mouseBounds.y);
     }
     private void update(float deltaTime) {
+
+        player.update(deltaTime);
 
         touchControllers();
 
@@ -131,8 +107,8 @@ public class Main extends ApplicationAdapter {
             colorIndex = MathUtils.random(0, colors.length - 1);
         }
 
-        // Check collision between two rectangles.
-        if (rectangle.overlaps(ball))
+        // Check collision between two player.boundss.
+        if (player.bounds.overlaps(ball))
         {
             ballVelocity.scl(-1);
             score++;
@@ -144,7 +120,6 @@ public class Main extends ApplicationAdapter {
             ball.x += ballVelocity.x * deltaTime;
             ball.y += ballVelocity.y * deltaTime;
         }
-
     }
 
     private void keyboardControllers(float deltaTime) {
@@ -156,40 +131,40 @@ public class Main extends ApplicationAdapter {
             gameState--;
 
         if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.Q))
-            rectangle.setPosition(0, 0);
+            player.bounds.setPosition(0, 0);
 
         if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.SPACE))
             shouldClearScreen = !shouldClearScreen;
 
-        if (Gdx.app.getInput().isKeyPressed(Input.Keys.W) && rectangle.y < SCREEN_HEIGHT - rectangle.height)
-            rectangle.y += playerSpeed * deltaTime;
+        if (Gdx.app.getInput().isKeyPressed(Input.Keys.W) && player.bounds.y < SCREEN_HEIGHT - player.bounds.height)
+            player.bounds.y += playerSpeed * deltaTime;
 
-        if (Gdx.app.getInput().isKeyPressed(Input.Keys.S) && rectangle.y > 0)
-            rectangle.y -= playerSpeed * deltaTime;
+        if (Gdx.app.getInput().isKeyPressed(Input.Keys.S) && player.bounds.y > 0)
+            player.bounds.y -= playerSpeed * deltaTime;
 
-        if (Gdx.app.getInput().isKeyPressed(Input.Keys.D) && rectangle.x < SCREEN_WIDTH - rectangle.width)
-            rectangle.x += playerSpeed * deltaTime;
+        if (Gdx.app.getInput().isKeyPressed(Input.Keys.D) && player.bounds.x < SCREEN_WIDTH - player.bounds.width)
+            player.bounds.x += playerSpeed * deltaTime;
 
-        if (Gdx.app.getInput().isKeyPressed(Input.Keys.A) && rectangle.x > 0)
-            rectangle.x -= playerSpeed * deltaTime;
+        if (Gdx.app.getInput().isKeyPressed(Input.Keys.A) && player.bounds.x > 0)
+            player.bounds.x -= playerSpeed * deltaTime;
     }
 
     private void joystickControllers(float deltaTime) {
 
-        if (controller.getButton(controller.getMapping().buttonDpadUp) && rectangle.y < SCREEN_HEIGHT - rectangle.height)
-            rectangle.y += playerSpeed * deltaTime;
+        if (controller.getButton(controller.getMapping().buttonDpadUp) && player.bounds.y < SCREEN_HEIGHT - player.bounds.height)
+            player.bounds.y += playerSpeed * deltaTime;
 
-        if (controller.getButton(controller.getMapping().buttonDpadDown) && rectangle.y > 0)
-            rectangle.y -= playerSpeed * deltaTime;
+        if (controller.getButton(controller.getMapping().buttonDpadDown) && player.bounds.y > 0)
+            player.bounds.y -= playerSpeed * deltaTime;
 
-        if (controller.getButton(controller.getMapping().buttonDpadRight) && rectangle.x < SCREEN_WIDTH - rectangle.width)
-            rectangle.x += playerSpeed * deltaTime;
+        if (controller.getButton(controller.getMapping().buttonDpadRight) && player.bounds.x < SCREEN_WIDTH - player.bounds.width)
+            player.bounds.x += playerSpeed * deltaTime;
 
-        if (controller.getButton(controller.getMapping().buttonDpadLeft) && rectangle.x > 0)
-            rectangle.x -= playerSpeed * deltaTime;
+        if (controller.getButton(controller.getMapping().buttonDpadLeft) && player.bounds.x > 0)
+            player.bounds.x -= playerSpeed * deltaTime;
 
         if (controller.getButton(controller.getMapping().buttonBack))
-            rectangle.setPosition(0, 0);
+            player.bounds.setPosition(0, 0);
 
         if (controller.getButton(controller.getMapping().buttonLeftStick))
             shouldClearScreen = !shouldClearScreen;
@@ -206,11 +181,6 @@ public class Main extends ApplicationAdapter {
         if (!isGamePaused)
             update(deltaTime);
 
-        animationTimer += deltaTime;
-
-        playerRegion = birdsAnimation.getKeyFrame(animationTimer, true);
-//        playerRegion = reimuAnimation.getKeyFrame(animationTimer, true);
-
         if (shouldClearScreen)
             ScreenUtils.clear(Color.BLACK);
 
@@ -220,7 +190,7 @@ public class Main extends ApplicationAdapter {
         if (gameState <= 2) {
 
             shapeRenderer.setColor(Color.WHITE);
-            shapeRenderer.rect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+            player.draw(shapeRenderer);
         }
 
         if (gameState >= 2) {
@@ -234,13 +204,11 @@ public class Main extends ApplicationAdapter {
         batch.setProjectionMatrix(viewport.getCamera().combined);
         batch.begin();
 
-//        batch.draw(playerRegion, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
-
         if (gameState > 2)
-            batch.draw(playerRegion, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+            player.draw(batch);
 
         if (gameState == 1)
-            font.draw(batch,"(" + (int)rectangle.x + ", " + (int)rectangle.y + ")" ,450,SCREEN_HEIGHT - 50);
+            font.draw(batch,"(" + (int)player.bounds.x + ", " + (int)player.bounds.y + ")" ,450,SCREEN_HEIGHT - 50);
 
         if (gameState >= 2)
             font.draw(batch, String.valueOf(score),200,SCREEN_HEIGHT - 50);

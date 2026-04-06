@@ -110,10 +110,12 @@ public class Main extends ApplicationAdapter {
         if (player.bounds.overlaps(ball))
         {
             ballVelocity.scl(-1);
-            score++;
 
-            if (gameState >= 3)
+            if (gameState >= 3) {
+
+                score++;
                 sound.play();
+            }
         }
 
         if (gameState >= 2) {
@@ -188,11 +190,13 @@ public class Main extends ApplicationAdapter {
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        if (gameState <= 3) {
+        shapeRenderer.setColor(Color.WHITE);
 
-            shapeRenderer.setColor(Color.WHITE);
+        if (gameState == 1)
+            drawCoordinateSystem(shapeRenderer);
+
+        if (gameState <= 4)
             player.draw(shapeRenderer);
-        }
 
         if (gameState >= 2) {
 
@@ -205,25 +209,45 @@ public class Main extends ApplicationAdapter {
         batch.setProjectionMatrix(viewport.getCamera().combined);
         batch.begin();
 
-        if (gameState == 4)
+        if (gameState == 5)
             player.draw(batch);
 
-        if (gameState == 5)
+        if (gameState == 6)
             player.drawBirdAnimation(batch);
 
-        else if (gameState >= 6)
+        else if (gameState >= 7)
             player.drawReimuAnimation(batch);
 
         if (gameState == 1)
             font.draw(batch,"(" + (int)player.bounds.x + ", " + (int)player.bounds.y + ")" ,450,SCREEN_HEIGHT - 50);
 
-        else if (gameState >= 3)
+        else if (gameState >= 4)
             font.draw(batch, String.valueOf(score),200,SCREEN_HEIGHT - 50);
 
         if (isGamePaused)
             font.draw(batch, "Game Paused",350,SCREEN_HEIGHT / 2f);
 
         batch.end();
+    }
+
+    private void drawCoordinateSystem(ShapeRenderer shapeRenderer) {
+
+        int newPosition = 40;
+        int lineLength = 20;
+
+        for (int i = 0; i < 18; i++)
+        {
+            shapeRenderer.rectLine( 0, newPosition, lineLength, newPosition, 4);
+            newPosition += 40;
+        }
+
+        newPosition = 40;
+
+        for (int i = 0; i < 35; i++)
+        {
+            shapeRenderer.rectLine(newPosition, 0, newPosition,  lineLength, 4);
+            newPosition += 40;
+        }
     }
 
     @Override

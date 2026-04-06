@@ -188,11 +188,13 @@ public class Main extends ApplicationAdapter {
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        if (gameState <= 3) {
+        shapeRenderer.setColor(Color.WHITE);
 
-            shapeRenderer.setColor(Color.WHITE);
+        if (gameState == 1)
+            drawCoordinateSystem(shapeRenderer);
+
+        if (gameState <= 3)
             player.draw(shapeRenderer);
-        }
 
         if (gameState >= 2) {
 
@@ -224,6 +226,26 @@ public class Main extends ApplicationAdapter {
             font.draw(batch, "Game Paused",350,SCREEN_HEIGHT / 2f);
 
         batch.end();
+    }
+
+    private void drawCoordinateSystem(ShapeRenderer shapeRenderer) {
+
+        int newPosition = 40;
+        int lineLength = 20;
+
+        for (int i = 0; i < 18; i++)
+        {
+            shapeRenderer.rectLine( 0, newPosition, lineLength, newPosition, 4);
+            newPosition += 40;
+        }
+
+        newPosition = 40;
+
+        for (int i = 0; i < 35; i++)
+        {
+            shapeRenderer.rectLine(newPosition, 0, newPosition,  lineLength, 4);
+            newPosition += 40;
+        }
     }
 
     @Override

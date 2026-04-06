@@ -32,12 +32,14 @@ public class Main extends ApplicationAdapter implements ControllerListener {
     private SpriteBatch batch;
     private Texture fontTexture;
     private Player player;
+    private Rectangle player2;
     private BitmapFont font;
     private Rectangle ball;
     private Vector2 ballVelocity;
     private Color[] colors;
     private int colorIndex;
     private int score;
+    private int score2;
     private final int playerSpeed = 600;
     private boolean shouldClearScreen = true;
     private Sound sound;
@@ -67,8 +69,9 @@ public class Main extends ApplicationAdapter implements ControllerListener {
         sound = Gdx.audio.newSound(Gdx.files.internal("sounds/magic.wav"));
 
         player = new Player((int) (SCREEN_WIDTH / 2f), (int) (SCREEN_HEIGHT / 2f), "img/redbird.png");
+        player2 = new Rectangle(SCREEN_WIDTH - 32, SCREEN_HEIGHT / 2f, 16, 96);
 
-        ball = new Rectangle(100, 100, 32, 32);
+        ball = new Rectangle(SCREEN_WIDTH / 2f - 32 / 2f, SCREEN_HEIGHT / 2f, 32, 32);
         ballVelocity = new Vector2(400, 400);
 
         colors = new Color[]{Color.RED, Color.GREEN, Color.BLUE, Color.CORAL, Color.GOLD};
@@ -116,14 +119,14 @@ public class Main extends ApplicationAdapter implements ControllerListener {
 
             ballVelocity.scl(-1);
 
-            if (gameState >= 3) {
-
-                score++;
+            if (gameState >= 3)
                 sound.play();
-            }
+
+            if (gameState >= 4)
+                score++;
         }
 
-        if (gameState >= 2) {
+        if (gameState >= 2 || gameState < -2) {
 
             ball.x += ballVelocity.x * deltaTime;
             ball.y += ballVelocity.y * deltaTime;
@@ -135,7 +138,7 @@ public class Main extends ApplicationAdapter implements ControllerListener {
         if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.F2) && gameState < 7)
             gameState++;
 
-        if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.F1) && gameState > -1)
+        if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.F1) && gameState >= 0)
             gameState--;
 
         if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.Q))
@@ -222,9 +225,21 @@ public class Main extends ApplicationAdapter implements ControllerListener {
             player.draw(shapeRenderer);
         }
 
+        if (gameState < 0)
+            shapeRenderer.rect(player2.x, player2.y, player2.width, player2.height);
+
+        if (gameState < -4)
+            shapeRenderer.rectLine(SCREEN_WIDTH / 2f, SCREEN_HEIGHT, SCREEN_WIDTH / 2f, 0, 2);
+
         if (gameState >= 2) {
 
             shapeRenderer.setColor(colors[colorIndex]);
+            shapeRenderer.rect(ball.x, ball.y, ball.width, ball.height);
+        }
+
+        if (gameState < -1) {
+
+            shapeRenderer.setColor(Color.WHITE);
             shapeRenderer.rect(ball.x, ball.y, ball.width, ball.height);
         }
 
@@ -239,17 +254,22 @@ public class Main extends ApplicationAdapter implements ControllerListener {
         if (gameState == 6)
             player.drawBirdAnimation(batch);
 
-        else if (gameState >= 7)
+        else if (gameState == 7)
             player.drawReimuAnimation(batch);
 
         if (gameState == 1)
             font.draw(batch, "(" + (int) player.bounds.x + ", " + (int) player.bounds.y + ")", 450, SCREEN_HEIGHT - 50);
 
-        else if (gameState >= 4)
-            font.draw(batch, String.valueOf(score), 200, SCREEN_HEIGHT - 50);
+        if (gameState >= 4 || gameState < -3)
+            font.draw(batch, String.valueOf(score), SCREEN_WIDTH / 2f - 150, SCREEN_HEIGHT - 50);
+
+        if (gameState < -3)
+            font.draw(batch, String.valueOf(score2), SCREEN_WIDTH / 2f + 110, SCREEN_HEIGHT - 50);
 
         if (isGamePaused)
             font.draw(batch, "Game Paused", 350, SCREEN_HEIGHT / 2f);
+
+        font.draw(batch, String.valueOf(gameState), SCREEN_WIDTH - 150, SCREEN_HEIGHT - 50);
 
         batch.end();
     }
@@ -276,9 +296,9 @@ public class Main extends ApplicationAdapter implements ControllerListener {
 
     private void resetValues() {
 
+        gameState = 1;
         player.bounds.set(0, 0, 34 , 24);
-        ball.setPosition(100, 100);
-
+        ball.setPosition(SCREEN_WIDTH / 2f - ball.width / 2f, SCREEN_HEIGHT / 2f);
         score = 0;
     }
 
@@ -299,17 +319,20 @@ public class Main extends ApplicationAdapter implements ControllerListener {
         if (buttonCode == controller.getMapping().buttonR1 && gameState < 7)
             gameState++;
 
-        if (buttonCode == controller.getMapping().buttonL1 && gameState > -1)
+        if (buttonCode == controller.getMapping().buttonL1 && gameState > -10)
             gameState--;
 
         if (buttonCode == controller.getMapping().buttonStart)
             isGamePaused = !isGamePaused;
 
+        if (buttonCode == controller.getMapping().buttonBack)
+            resetValues();
+
         if (buttonCode == controller.getMapping().buttonLeftStick)
             shouldClearScreen = !shouldClearScreen;
 
-        if (buttonCode == controller.getMapping().buttonBack)
-            resetValues();
+        if (buttonCode == controller.getMapping().buttonRightStick)
+            ball.setPosition(100, 100);
 
         return false;
     }

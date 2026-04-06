@@ -107,7 +107,6 @@ public class Main extends ApplicationAdapter {
             colorIndex = MathUtils.random(0, colors.length - 1);
         }
 
-        // Check collision between two player.boundss.
         if (player.bounds.overlaps(ball))
         {
             ballVelocity.scl(-1);
@@ -204,13 +203,16 @@ public class Main extends ApplicationAdapter {
         batch.setProjectionMatrix(viewport.getCamera().combined);
         batch.begin();
 
-        if (gameState > 2)
+        if (gameState == 3)
             player.draw(batch);
+
+        else if (gameState == 4)
+            player.drawReimu(batch);
 
         if (gameState == 1)
             font.draw(batch,"(" + (int)player.bounds.x + ", " + (int)player.bounds.y + ")" ,450,SCREEN_HEIGHT - 50);
 
-        if (gameState >= 2)
+        else if (gameState >= 2)
             font.draw(batch, String.valueOf(score),200,SCREEN_HEIGHT - 50);
 
         if (isGamePaused)
@@ -221,6 +223,8 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void dispose() {
+
+        player.dispose();
         font.dispose();
         sound.dispose();
         fontTexture.dispose();

@@ -11,11 +11,12 @@ import com.badlogic.gdx.utils.Array;
 public class Player {
 
     public final Rectangle bounds;
+    public final Rectangle reimuBounds;
     private TextureRegion textureRegion;
-    private TextureRegion birdsRegion;
-    private TextureRegion reimuRegion;
-    private Animation<TextureRegion> birdsAnimation;
-    private Animation<TextureRegion> reimuAnimation;
+    private final TextureRegion birdsRegion;
+    private final TextureRegion reimuRegion;
+    private final Animation<TextureRegion> birdsAnimation;
+    private final Animation<TextureRegion> reimuAnimation;
     private float animationTimer;
 
     public Player(int positionX, int positionY, String path) {
@@ -24,40 +25,46 @@ public class Player {
         bounds = new Rectangle(100, 100, textureRegion.getRegionWidth(), textureRegion.getRegionHeight());
 
         reimuRegion = new TextureRegion(new Texture("img/reimu-spritesheet.png"));
+
+        reimuBounds = new Rectangle(0, 0, reimuRegion.getRegionWidth() / 8f, reimuRegion.getRegionHeight());
+
         birdsRegion = new TextureRegion(new Texture("img/red-bird-sprites.png"));
 
-        birdsAnimation = makeAnimationByTotalFrames(birdsRegion, 3);
-        reimuAnimation = makeAnimationByTotalFrames(reimuRegion, 8);
+        birdsAnimation = makeAnimationByRegion(birdsRegion, 3, 0.15f);
+        reimuAnimation = makeAnimationByRegion(reimuRegion, 14, 0.04f);
     }
 
-    private Animation<TextureRegion> makeAnimationByTotalFrames(TextureRegion region, int totalFrames) {
+    private Animation<TextureRegion> makeAnimationByRegion(TextureRegion region, int totalFrames, float frameDuration) {
 
-        int textureWidth = region.getRegionWidth() / totalFrames;
+        int frameWidth = region.getRegionWidth() / totalFrames;
 
         Array<TextureRegion> animationFrames = new Array<>();
 
         for (int i = 0; i < totalFrames; i++)
-            animationFrames.add(new TextureRegion(region, i * textureWidth, 0, textureWidth, region.getRegionHeight()));
+            animationFrames.add(new TextureRegion(region, i * frameWidth, 0, frameWidth, region.getRegionHeight()));
 
-        return new Animation<>(0.2f, animationFrames);
+        return new Animation<>(frameDuration, animationFrames);
     }
 
     public void update(float deltaTime) {
 
         animationTimer += deltaTime;
+    }
 
-        textureRegion = birdsAnimation.getKeyFrame(animationTimer, true);
-//        playerRegion = reimuAnimation.getKeyFrame(animationTimer, true);
+    public void draw(ShapeRenderer shapeRenderer) {
+        shapeRenderer.rect(bounds.x, bounds.y, bounds.width, bounds.height);
     }
 
     public void draw(Batch batch) {
 
+        textureRegion = birdsAnimation.getKeyFrame(animationTimer, true);
         batch.draw(textureRegion, bounds.x, bounds.y, bounds.width, bounds.height);
     }
 
-    public void draw(ShapeRenderer shapeRenderer) {
+    public void drawReimu(Batch batch) {
 
-        shapeRenderer.rect(bounds.x, bounds.y, bounds.width, bounds.height);
+        textureRegion = reimuAnimation.getKeyFrame(animationTimer, true);
+        batch.draw(textureRegion, bounds.x, bounds.y, reimuBounds.width, reimuBounds.height);
     }
 
     public void dispose() {

@@ -22,7 +22,7 @@ public class Player {
     public Player(int positionX, int positionY, String path) {
 
         textureRegion = new TextureRegion(new Texture(path));
-        bounds = new Rectangle(100, 100, textureRegion.getRegionWidth(), textureRegion.getRegionHeight());
+        bounds = new Rectangle(positionX, positionY, textureRegion.getRegionWidth(), textureRegion.getRegionHeight());
 
         reimuRegion = new TextureRegion(new Texture("img/reimu-spritesheet.png"));
 
@@ -57,11 +57,16 @@ public class Player {
 
     public void draw(Batch batch) {
 
+        batch.draw(textureRegion, bounds.x, bounds.y, bounds.width, bounds.height);
+    }
+
+    public void drawBirdAnimation(Batch batch) {
+
         textureRegion = birdsAnimation.getKeyFrame(animationTimer, true);
         batch.draw(textureRegion, bounds.x, bounds.y, bounds.width, bounds.height);
     }
 
-    public void drawReimu(Batch batch) {
+    public void drawReimuAnimation(Batch batch) {
 
         textureRegion = reimuAnimation.getKeyFrame(animationTimer, true);
         batch.draw(textureRegion, bounds.x, bounds.y, reimuBounds.width, reimuBounds.height);

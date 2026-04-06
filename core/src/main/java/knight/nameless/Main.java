@@ -53,13 +53,13 @@ public class Main extends ApplicationAdapter {
 
         sound = Gdx.audio.newSound(Gdx.files.internal("sounds/magic.wav"));
 
-        player = new Player(100, 100, "img/redbird.png");
+        player = new Player((int) (SCREEN_WIDTH / 2f), (int) (SCREEN_HEIGHT / 2f), "img/redbird.png");
 
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         controller = Controllers.getCurrent();
 
-        ball = new Rectangle(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 32, 32);
+        ball = new Rectangle(100, 100, 32, 32);
         ballVelocity = new Vector2(400, 400);
 
         colors = new Color[]{Color.RED, Color.GREEN, Color.BLUE, Color.CORAL, Color.GOLD};
@@ -111,7 +111,9 @@ public class Main extends ApplicationAdapter {
         {
             ballVelocity.scl(-1);
             score++;
-            sound.play();
+
+            if (gameState >= 3)
+                sound.play();
         }
 
         if (gameState >= 2) {
@@ -186,7 +188,7 @@ public class Main extends ApplicationAdapter {
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        if (gameState <= 2) {
+        if (gameState <= 3) {
 
             shapeRenderer.setColor(Color.WHITE);
             player.draw(shapeRenderer);
@@ -203,16 +205,19 @@ public class Main extends ApplicationAdapter {
         batch.setProjectionMatrix(viewport.getCamera().combined);
         batch.begin();
 
-        if (gameState == 3)
+        if (gameState == 4)
             player.draw(batch);
 
-        else if (gameState == 4)
-            player.drawReimu(batch);
+        if (gameState == 5)
+            player.drawBirdAnimation(batch);
+
+        else if (gameState >= 6)
+            player.drawReimuAnimation(batch);
 
         if (gameState == 1)
             font.draw(batch,"(" + (int)player.bounds.x + ", " + (int)player.bounds.y + ")" ,450,SCREEN_HEIGHT - 50);
 
-        else if (gameState >= 2)
+        else if (gameState >= 3)
             font.draw(batch, String.valueOf(score),200,SCREEN_HEIGHT - 50);
 
         if (isGamePaused)

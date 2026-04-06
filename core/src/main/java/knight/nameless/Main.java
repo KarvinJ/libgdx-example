@@ -9,6 +9,7 @@ import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -17,10 +18,12 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 public class Main extends ApplicationAdapter {
+
     private final int SCREEN_WIDTH = 1280;
     private final int SCREEN_HEIGHT = 720;
     public OrthographicCamera camera;
@@ -29,7 +32,11 @@ public class Main extends ApplicationAdapter {
     private ShapeRenderer shapeRenderer;
     private SpriteBatch batch;
     private Texture fontTexture;
-    private Texture texture;
+    private TextureRegion playerRegion;
+    private TextureRegion birdsRegion;
+    private TextureRegion reimuRegion;
+    private Animation<TextureRegion> birdsAnimation;
+    private Animation<TextureRegion> reimuAnimation;
     private BitmapFont font;
     private Rectangle rectangle;
     private Rectangle ball;
@@ -42,11 +49,18 @@ public class Main extends ApplicationAdapter {
     private Sound sound;
     private int gameState;
     private boolean isGamePaused;
+    private float animationTimer;
 
     @Override
     public void create() {
 
-        texture = new Texture("img/redbird.png");
+        reimuRegion = new TextureRegion(new Texture("img/reimu-spritesheet.png"));
+        birdsRegion = new TextureRegion(new Texture("img/red-bird-sprites.png"));
+
+        birdsAnimation = makeAnimationByTotalFrames(birdsRegion, 3);
+        reimuAnimation = makeAnimationByTotalFrames(reimuRegion, 8);
+
+        playerRegion = new TextureRegion(new Texture("img/redbird.png"));
         fontTexture = new Texture("fonts/test.png");
         fontTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         font = new BitmapFont(Gdx.files.internal("fonts/test.fnt"), new TextureRegion(fontTexture));
@@ -58,7 +72,7 @@ public class Main extends ApplicationAdapter {
         shapeRenderer = new ShapeRenderer();
         controller = Controllers.getCurrent();
 
-        rectangle = new Rectangle(100, 100, texture.getWidth(), texture.getHeight());
+        rectangle = new Rectangle(100, 100, playerRegion.getRegionWidth(), playerRegion.getRegionHeight());
         ball = new Rectangle(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 32, 32);
         ballVelocity = new Vector2(400, 400);
 
@@ -67,6 +81,18 @@ public class Main extends ApplicationAdapter {
         camera = new OrthographicCamera();
         camera.position.set(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 0);
         viewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT, camera);
+    }
+
+    private Animation<TextureRegion> makeAnimationByTotalFrames(TextureRegion region, int totalFrames) {
+
+        int textureWidth = region.getRegionWidth() / totalFrames;
+
+        Array<TextureRegion> animationFrames = new Array<>();
+
+        for (int i = 0; i < totalFrames; i++)
+            animationFrames.add(new TextureRegion(region, i * textureWidth, 0, textureWidth, region.getRegionHeight()));
+
+        return new Animation<>(0.2f, animationFrames);
     }
 
     @Override
@@ -180,6 +206,11 @@ public class Main extends ApplicationAdapter {
         if (!isGamePaused)
             update(deltaTime);
 
+        animationTimer += deltaTime;
+
+        playerRegion = birdsAnimation.getKeyFrame(animationTimer, true);
+//        playerRegion = reimuAnimation.getKeyFrame(animationTimer, true);
+
         if (shouldClearScreen)
             ScreenUtils.clear(Color.BLACK);
 
@@ -203,8 +234,10 @@ public class Main extends ApplicationAdapter {
         batch.setProjectionMatrix(viewport.getCamera().combined);
         batch.begin();
 
+//        batch.draw(playerRegion, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+
         if (gameState > 2)
-            batch.draw(texture, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+            batch.draw(playerRegion, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
 
         if (gameState == 1)
             font.draw(batch,"(" + (int)rectangle.x + ", " + (int)rectangle.y + ")" ,450,SCREEN_HEIGHT - 50);

@@ -139,7 +139,7 @@ public class Main extends ApplicationAdapter implements ControllerListener {
             gameState--;
 
         if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.Q))
-            player.bounds.setPosition(0, 0);
+            resetValues();
 
         if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.SPACE))
             shouldClearScreen = !shouldClearScreen;
@@ -155,6 +155,18 @@ public class Main extends ApplicationAdapter implements ControllerListener {
 
         if (Gdx.app.getInput().isKeyPressed(Input.Keys.A) && player.bounds.x > 0)
             player.bounds.x -= playerSpeed * deltaTime;
+
+        if (Gdx.app.getInput().isKeyPressed(Input.Keys.UP))
+            player.bounds.height++;
+
+        if (Gdx.app.getInput().isKeyPressed(Input.Keys.DOWN))
+            player.bounds.height--;
+
+        if (Gdx.app.getInput().isKeyPressed(Input.Keys.LEFT))
+            player.bounds.width--;
+
+        if (Gdx.app.getInput().isKeyPressed(Input.Keys.RIGHT))
+            player.bounds.width++;
     }
 
     private void joystickControllers(float deltaTime) {
@@ -170,6 +182,18 @@ public class Main extends ApplicationAdapter implements ControllerListener {
 
         if (controller.getButton(controller.getMapping().buttonDpadLeft) && player.bounds.x > 0)
             player.bounds.x -= playerSpeed * deltaTime;
+
+        if (controller.getButton(controller.getMapping().buttonY))
+            player.bounds.height++;
+
+        if (controller.getButton(controller.getMapping().buttonA))
+            player.bounds.height--;
+
+        if (controller.getButton(controller.getMapping().buttonX))
+            player.bounds.width--;
+
+        if (controller.getButton(controller.getMapping().buttonB))
+            player.bounds.width++;
     }
 
     @Override
@@ -250,6 +274,14 @@ public class Main extends ApplicationAdapter implements ControllerListener {
         }
     }
 
+    private void resetValues() {
+
+        player.bounds.set(0, 0, 34 , 24);
+        ball.setPosition(100, 100);
+
+        score = 0;
+    }
+
     @Override
     public void dispose() {
 
@@ -277,7 +309,7 @@ public class Main extends ApplicationAdapter implements ControllerListener {
             shouldClearScreen = !shouldClearScreen;
 
         if (buttonCode == controller.getMapping().buttonBack)
-            player.bounds.setPosition(0, 0);
+            resetValues();
 
         return false;
     }

@@ -190,13 +190,14 @@ public class Main extends ApplicationAdapter {
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        shapeRenderer.setColor(Color.WHITE);
-
         if (gameState == 1)
             drawCoordinateSystem(shapeRenderer);
 
-        if (gameState <= 4)
+        if (gameState <= 3) {
+
+            shapeRenderer.setColor(Color.WHITE);
             player.draw(shapeRenderer);
+        }
 
         if (gameState >= 2) {
 
@@ -209,19 +210,19 @@ public class Main extends ApplicationAdapter {
         batch.setProjectionMatrix(viewport.getCamera().combined);
         batch.begin();
 
-        if (gameState == 5)
+        if (gameState == 4)
             player.draw(batch);
 
-        if (gameState == 6)
+        if (gameState == 5)
             player.drawBirdAnimation(batch);
 
-        else if (gameState >= 7)
+        else if (gameState >= 6)
             player.drawReimuAnimation(batch);
 
         if (gameState == 1)
             font.draw(batch,"(" + (int)player.bounds.x + ", " + (int)player.bounds.y + ")" ,450,SCREEN_HEIGHT - 50);
 
-        else if (gameState >= 4)
+        else if (gameState >= 3)
             font.draw(batch, String.valueOf(score),200,SCREEN_HEIGHT - 50);
 
         if (isGamePaused)

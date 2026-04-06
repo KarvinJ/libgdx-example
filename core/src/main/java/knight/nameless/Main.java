@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.controllers.Controller;
+import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -20,7 +21,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
-public class Main extends ApplicationAdapter {
+public class Main extends ApplicationAdapter implements ControllerListener {
 
     private final int SCREEN_WIDTH = 1280;
     private final int SCREEN_HEIGHT = 720;
@@ -46,6 +47,18 @@ public class Main extends ApplicationAdapter {
     @Override
     public void create() {
 
+        camera = new OrthographicCamera();
+        camera.position.set(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 0);
+        viewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT, camera);
+
+        batch = new SpriteBatch();
+        shapeRenderer = new ShapeRenderer();
+
+        controller = Controllers.getCurrent();
+
+        if (controller != null)
+            controller.addListener(this);
+
         fontTexture = new Texture("fonts/test.png");
         fontTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         font = new BitmapFont(Gdx.files.internal("fonts/test.fnt"), new TextureRegion(fontTexture));
@@ -55,18 +68,10 @@ public class Main extends ApplicationAdapter {
 
         player = new Player((int) (SCREEN_WIDTH / 2f), (int) (SCREEN_HEIGHT / 2f), "img/redbird.png");
 
-        batch = new SpriteBatch();
-        shapeRenderer = new ShapeRenderer();
-        controller = Controllers.getCurrent();
-
         ball = new Rectangle(100, 100, 32, 32);
         ballVelocity = new Vector2(400, 400);
 
         colors = new Color[]{Color.RED, Color.GREEN, Color.BLUE, Color.CORAL, Color.GOLD};
-
-        camera = new OrthographicCamera();
-        camera.position.set(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 0);
-        viewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT, camera);
     }
 
     @Override
@@ -82,6 +87,7 @@ public class Main extends ApplicationAdapter {
         if (Gdx.input.isTouched())
             player.bounds.setPosition(mouseBounds.x, mouseBounds.y);
     }
+
     private void update(float deltaTime) {
 
         player.update(deltaTime);
@@ -95,20 +101,19 @@ public class Main extends ApplicationAdapter {
         else
             controller = Controllers.getCurrent();
 
-        if (ball.x < 0 || ball.x > SCREEN_WIDTH - ball.width)
-        {
+        if (ball.x < 0 || ball.x > SCREEN_WIDTH - ball.width) {
+
             ballVelocity.x *= -1;
             colorIndex = MathUtils.random(0, colors.length - 1);
         }
+        else if (ball.y < 0 || ball.y > SCREEN_HEIGHT - ball.height) {
 
-        else if (ball.y < 0 || ball.y > SCREEN_HEIGHT - ball.height)
-        {
-            ballVelocity.y  *= -1;
+            ballVelocity.y *= -1;
             colorIndex = MathUtils.random(0, colors.length - 1);
         }
 
-        if (player.bounds.overlaps(ball))
-        {
+        if (player.bounds.overlaps(ball)) {
+
             ballVelocity.scl(-1);
 
             if (gameState >= 3) {
@@ -165,12 +170,6 @@ public class Main extends ApplicationAdapter {
 
         if (controller.getButton(controller.getMapping().buttonDpadLeft) && player.bounds.x > 0)
             player.bounds.x -= playerSpeed * deltaTime;
-
-        if (controller.getButton(controller.getMapping().buttonBack))
-            player.bounds.setPosition(0, 0);
-
-        if (controller.getButton(controller.getMapping().buttonLeftStick))
-            shouldClearScreen = !shouldClearScreen;
     }
 
     @Override
@@ -220,13 +219,13 @@ public class Main extends ApplicationAdapter {
             player.drawReimuAnimation(batch);
 
         if (gameState == 1)
-            font.draw(batch,"(" + (int)player.bounds.x + ", " + (int)player.bounds.y + ")" ,450,SCREEN_HEIGHT - 50);
+            font.draw(batch, "(" + (int) player.bounds.x + ", " + (int) player.bounds.y + ")", 450, SCREEN_HEIGHT - 50);
 
         else if (gameState >= 4)
-            font.draw(batch, String.valueOf(score),200,SCREEN_HEIGHT - 50);
+            font.draw(batch, String.valueOf(score), 200, SCREEN_HEIGHT - 50);
 
         if (isGamePaused)
-            font.draw(batch, "Game Paused",350,SCREEN_HEIGHT / 2f);
+            font.draw(batch, "Game Paused", 350, SCREEN_HEIGHT / 2f);
 
         batch.end();
     }
@@ -236,17 +235,17 @@ public class Main extends ApplicationAdapter {
         int newPosition = 40;
         int lineLength = 20;
 
-        for (int i = 0; i < 18; i++)
-        {
-            shapeRenderer.rectLine( 0, newPosition, lineLength, newPosition, 4);
+        for (int i = 0; i < 18; i++) {
+
+            shapeRenderer.rectLine(0, newPosition, lineLength, newPosition, 4);
             newPosition += 40;
         }
 
         newPosition = 40;
 
-        for (int i = 0; i < 35; i++)
-        {
-            shapeRenderer.rectLine(newPosition, 0, newPosition,  lineLength, 4);
+        for (int i = 0; i < 35; i++) {
+
+            shapeRenderer.rectLine(newPosition, 0, newPosition, lineLength, 4);
             newPosition += 40;
         }
     }
@@ -260,5 +259,42 @@ public class Main extends ApplicationAdapter {
         fontTexture.dispose();
         shapeRenderer.dispose();
         batch.dispose();
+    }
+
+    @Override
+    public boolean buttonDown(Controller controller, int buttonCode) {
+
+        if (buttonCode == controller.getMapping().buttonR1 && gameState < 7)
+            gameState++;
+
+        if (buttonCode == controller.getMapping().buttonL1 && gameState > -1)
+            gameState--;
+
+        if (buttonCode == controller.getMapping().buttonStart)
+            isGamePaused = !isGamePaused;
+
+        if (buttonCode == controller.getMapping().buttonLeftStick)
+            shouldClearScreen = !shouldClearScreen;
+
+        if (buttonCode == controller.getMapping().buttonBack)
+            player.bounds.setPosition(0, 0);
+
+        return false;
+    }
+
+    @Override
+    public void connected(Controller controller) {}
+
+    @Override
+    public void disconnected(Controller controller) {}
+
+    @Override
+    public boolean buttonUp(Controller controller, int buttonCode) {
+        return false;
+    }
+
+    @Override
+    public boolean axisMoved(Controller controller, int axisCode, float value) {
+        return false;
     }
 }

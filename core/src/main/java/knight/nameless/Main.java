@@ -18,6 +18,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
@@ -36,6 +37,7 @@ public class Main extends ApplicationAdapter implements ControllerListener {
     private BitmapFont font;
     private Rectangle ball;
     private Vector2 ballVelocity;
+    private Array<Brick> bricks;
     private Color[] colors;
     private int colorIndex;
     private int score;
@@ -48,10 +50,6 @@ public class Main extends ApplicationAdapter implements ControllerListener {
 
     @Override
     public void create() {
-
-        camera = new OrthographicCamera();
-        camera.position.set(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 0);
-        viewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT, camera);
 
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
@@ -74,12 +72,60 @@ public class Main extends ApplicationAdapter implements ControllerListener {
         ball = new Rectangle(100, 100, 32, 32);
         ballVelocity = new Vector2(400, 400);
 
-        colors = new Color[]{Color.RED, Color.GREEN, Color.BLUE, Color.CORAL, Color.GOLD};
+        colors = new Color[]{
+            Color.RED,
+            Color.GREEN,
+            Color.BLUE,
+            Color.CORAL,
+            Color.GOLD,
+            Color.CYAN,
+            Color.FOREST,
+            Color.PURPLE,
+            Color.LIGHT_GRAY,
+            Color.VIOLET,
+        };
+
+        bricks = createBricks();
+
+        camera = new OrthographicCamera();
+        camera.position.set(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 0);
+        viewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT, camera);
     }
 
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height);
+    }
+
+    private Array<Brick> createBricks() {
+
+        Array<Brick> bricks = new Array<>();
+
+        int brickPoints = 1;
+        int positionX;
+        int positionY = 400;
+
+        for (int row = 0; row < 9; row++)
+        {
+            positionX = 6;
+
+            for (int column = 0; column < 12; column++)
+            {
+                Brick actualBrick = new Brick(
+                    new Rectangle(positionX, positionY, 102, 20),
+                    brickPoints,
+                    colors[row]
+                );
+
+                bricks.add(actualBrick);
+                positionX += 106;
+            }
+
+            brickPoints++;
+            positionY += 22;
+        }
+
+        return bricks;
     }
 
     private void touchControllers() {
@@ -142,6 +188,24 @@ public class Main extends ApplicationAdapter implements ControllerListener {
             ball.y = SCREEN_HEIGHT / 2f;
             ballVelocity.scl(-1);
             score2++;
+        }
+
+        if (gameState == -8) {
+
+            for (Brick brick : bricks) {
+
+                if (brick.isDestroyed)
+                    continue;
+
+                if (brick.bounds.overlaps(ball)) {
+
+                    sound.play();
+                    ballVelocity.y *= -1;
+                    score += brick.points;
+                    brick.isDestroyed = true;
+                    break;
+                }
+            }
         }
 
         if (gameState >= 2 || gameState < -2) {
@@ -240,6 +304,12 @@ public class Main extends ApplicationAdapter implements ControllerListener {
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
+        if (gameState == -8) {
+
+            for (Brick brick : bricks)
+                brick.draw(shapeRenderer);
+        }
+
         if (gameState == 1)
             drawCoordinateSystem(shapeRenderer);
 
@@ -292,18 +362,18 @@ public class Main extends ApplicationAdapter implements ControllerListener {
             player.drawReimuAnimation(batch);
 
         if (gameState == 1)
-            font.draw(batch, "(" + (int) player.bounds.x + ", " + (int) player.bounds.y + ")", 450, SCREEN_HEIGHT - 50);
+            font.draw(batch, "(" + (int) player.bounds.x + ", " + (int) player.bounds.y + ")", 450, SCREEN_HEIGHT - 25);
 
         if (gameState >= 4 || gameState < -3)
-            font.draw(batch, String.valueOf(score), SCREEN_WIDTH / 2f - 150, SCREEN_HEIGHT - 50);
+            font.draw(batch, String.valueOf(score), SCREEN_WIDTH / 2f - 150, SCREEN_HEIGHT - 25);
 
         if (gameState < -3)
-            font.draw(batch, String.valueOf(score2), SCREEN_WIDTH / 2f + 110, SCREEN_HEIGHT - 50);
+            font.draw(batch, String.valueOf(score2), SCREEN_WIDTH / 2f + 110, SCREEN_HEIGHT - 25);
 
         if (isGamePaused)
             font.draw(batch, "Game Paused", 350, SCREEN_HEIGHT / 2f);
 
-        font.draw(batch, String.valueOf(gameState), SCREEN_WIDTH - 150, SCREEN_HEIGHT - 50);
+        font.draw(batch, String.valueOf(gameState), SCREEN_WIDTH - 150, SCREEN_HEIGHT - 25);
 
         batch.end();
     }

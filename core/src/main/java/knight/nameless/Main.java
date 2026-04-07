@@ -47,6 +47,7 @@ public class Main extends ApplicationAdapter implements ControllerListener {
     private Sound sound;
     private int gameState;
     private boolean isGamePaused;
+    private boolean isAutoPlayMode;
 
     @Override
     public void create() {
@@ -219,6 +220,9 @@ public class Main extends ApplicationAdapter implements ControllerListener {
             ball.x += (int)(ballVelocity.x * deltaTime);
             ball.y += (int)(ballVelocity.y * deltaTime);
         }
+
+        if (isAutoPlayMode && ball.y < SCREEN_HEIGHT - player2.height)
+            player2.y = ball.y;
     }
 
     private void keyboardControllers(float deltaTime) {
@@ -232,8 +236,11 @@ public class Main extends ApplicationAdapter implements ControllerListener {
         if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.Q))
             resetValues();
 
-        if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.E))
+        if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.E)) {
+
+            isAutoPlayMode = !isAutoPlayMode;
             ball.setPosition(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f);
+        }
 
         if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.SPACE))
             shouldClearScreen = !shouldClearScreen;
@@ -441,8 +448,11 @@ public class Main extends ApplicationAdapter implements ControllerListener {
         if (buttonCode == controller.getMapping().buttonLeftStick)
             shouldClearScreen = !shouldClearScreen;
 
-        if (buttonCode == controller.getMapping().buttonRightStick)
+        if (buttonCode == controller.getMapping().buttonRightStick) {
+
+            isAutoPlayMode = !isAutoPlayMode;
             ball.setPosition(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f);
+        }
 
         return false;
     }

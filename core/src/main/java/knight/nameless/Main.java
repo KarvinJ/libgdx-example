@@ -146,6 +146,9 @@ public class Main extends ApplicationAdapter implements ControllerListener {
         if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.Q))
             resetValues();
 
+        if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.E))
+            ball.setPosition(100, 100);
+
         if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.SPACE))
             shouldClearScreen = !shouldClearScreen;
 

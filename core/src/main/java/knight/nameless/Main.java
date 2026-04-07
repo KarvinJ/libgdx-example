@@ -71,7 +71,7 @@ public class Main extends ApplicationAdapter implements ControllerListener {
         player = new Player((int) (SCREEN_WIDTH / 2f), (int) (SCREEN_HEIGHT / 2f), "img/redbird.png");
         player2 = new Rectangle(SCREEN_WIDTH - 32, SCREEN_HEIGHT / 2f, 16, 96);
 
-        ball = new Rectangle(SCREEN_WIDTH / 2f - 32 / 2f, SCREEN_HEIGHT / 2f, 32, 32);
+        ball = new Rectangle(100, 100, 32, 32);
         ballVelocity = new Vector2(400, 400);
 
         colors = new Color[]{Color.RED, Color.GREEN, Color.BLUE, Color.CORAL, Color.GOLD};
@@ -121,18 +121,27 @@ public class Main extends ApplicationAdapter implements ControllerListener {
 
             ballVelocity.scl(-1);
 
-            if (gameState >= 3)
+            if (gameState < 0 || gameState >= 3)
                 sound.play();
 
             if (gameState >= 4)
                 score++;
         }
 
-        if (ball.x < - ball.width || ball.x > SCREEN_WIDTH) {
+        if (ball.x > SCREEN_WIDTH) {
 
             ball.x = SCREEN_WIDTH / 2f;
             ball.y = SCREEN_HEIGHT / 2f;
             ballVelocity.scl(-1);
+            score++;
+        }
+
+        else if (ball.x < - ball.width) {
+
+            ball.x = SCREEN_WIDTH / 2f;
+            ball.y = SCREEN_HEIGHT / 2f;
+            ballVelocity.scl(-1);
+            score2++;
         }
 
         if (gameState >= 2 || gameState < -2) {
@@ -154,7 +163,7 @@ public class Main extends ApplicationAdapter implements ControllerListener {
             resetValues();
 
         if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.E))
-            ball.setPosition(100, 100);
+            ball.setPosition(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f);
 
         if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.SPACE))
             shouldClearScreen = !shouldClearScreen;
@@ -254,8 +263,13 @@ public class Main extends ApplicationAdapter implements ControllerListener {
         if (gameState < -4)
             shapeRenderer.rectLine(SCREEN_WIDTH / 2f, SCREEN_HEIGHT, SCREEN_WIDTH / 2f, 0, 2);
 
-        if (gameState < -1)
+        if (gameState < -1) {
+
+            if (gameState == -6)
+                shapeRenderer.setColor(Color.YELLOW);
+
             shapeRenderer.rect(ball.x, ball.y, ball.width, ball.height);
+        }
 
         if (gameState >= 2) {
 
@@ -352,7 +366,7 @@ public class Main extends ApplicationAdapter implements ControllerListener {
             shouldClearScreen = !shouldClearScreen;
 
         if (buttonCode == controller.getMapping().buttonRightStick)
-            ball.setPosition(100, 100);
+            ball.setPosition(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f);
 
         return false;
     }

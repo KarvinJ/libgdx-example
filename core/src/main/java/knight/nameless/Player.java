@@ -33,7 +33,7 @@ public class Player {
         birdsAnimation = makeAnimationByRegion(birdsRegion, 3, 0.15f);
 
         reimuRegion = new TextureRegion(new Texture("img/reimu-spritesheet.png"));
-        reimuBounds = new Rectangle(0, 0, reimuRegion.getRegionWidth() / 8f, reimuRegion.getRegionHeight());
+        reimuBounds = new Rectangle(0, 0, reimuRegion.getRegionWidth() / 14f, reimuRegion.getRegionHeight());
         reimuAnimation = makeAnimationByRegion(reimuRegion, 14, 0.04f);
     }
 
@@ -72,7 +72,17 @@ public class Player {
     public void drawReimuAnimation(Batch batch) {
 
         textureRegion = reimuAnimation.getKeyFrame(animationTimer, true);
-        batch.draw(textureRegion, bounds.x, bounds.y, reimuBounds.width, reimuBounds.height);
+
+        var reimuWidth = reimuBounds.width * 2;
+        var reimuHeight = reimuBounds.height * 2;
+
+        batch.draw(
+            textureRegion,
+            bounds.x - reimuWidth / 4,
+            bounds.y - reimuHeight / 4,
+            reimuBounds.width * 2,
+            reimuBounds.height * 2
+        );
     }
 
     public void dispose() {

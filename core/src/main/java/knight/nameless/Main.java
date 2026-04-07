@@ -91,7 +91,9 @@ public class Main extends ApplicationAdapter implements ControllerListener {
             player.bounds.setPosition(mouseBounds.x, mouseBounds.y);
     }
 
-    private void update(float deltaTime) {
+    private void update() {
+
+        float deltaTime = Gdx.graphics.getDeltaTime();
 
         player.update(deltaTime);
 
@@ -202,16 +204,19 @@ public class Main extends ApplicationAdapter implements ControllerListener {
     @Override
     public void render() {
 
-        float deltaTime = Gdx.graphics.getDeltaTime();
-
         if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.ENTER))
             isGamePaused = !isGamePaused;
 
         if (!isGamePaused)
-            update(deltaTime);
+            update();
 
-        if (shouldClearScreen)
-            ScreenUtils.clear(Color.BLACK);
+        if (shouldClearScreen) {
+
+            if (gameState != -6)
+                ScreenUtils.clear(Color.BLACK);
+            else
+                ScreenUtils.clear(0.08f,0.63f,0.52f,1);
+        }
 
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
@@ -228,18 +233,23 @@ public class Main extends ApplicationAdapter implements ControllerListener {
         if (gameState < 0)
             shapeRenderer.rect(player2.x, player2.y, player2.width, player2.height);
 
+        if (gameState == -6) {
+
+            shapeRenderer.setColor(new Color(0.5f, 0.8f, 0.72f, 1));
+            shapeRenderer.circle(SCREEN_WIDTH / 2f,  SCREEN_HEIGHT / 2f, 150);
+        }
+
+        shapeRenderer.setColor(Color.WHITE);
+
         if (gameState < -4)
             shapeRenderer.rectLine(SCREEN_WIDTH / 2f, SCREEN_HEIGHT, SCREEN_WIDTH / 2f, 0, 2);
+
+        if (gameState < -1)
+            shapeRenderer.rect(ball.x, ball.y, ball.width, ball.height);
 
         if (gameState >= 2) {
 
             shapeRenderer.setColor(colors[colorIndex]);
-            shapeRenderer.rect(ball.x, ball.y, ball.width, ball.height);
-        }
-
-        if (gameState < -1) {
-
-            shapeRenderer.setColor(Color.WHITE);
             shapeRenderer.rect(ball.x, ball.y, ball.width, ball.height);
         }
 
@@ -338,12 +348,6 @@ public class Main extends ApplicationAdapter implements ControllerListener {
     }
 
     @Override
-    public void connected(Controller controller) {}
-
-    @Override
-    public void disconnected(Controller controller) {}
-
-    @Override
     public boolean buttonUp(Controller controller, int buttonCode) {
         return false;
     }
@@ -352,4 +356,10 @@ public class Main extends ApplicationAdapter implements ControllerListener {
     public boolean axisMoved(Controller controller, int axisCode, float value) {
         return false;
     }
+
+    @Override
+    public void connected(Controller controller) {}
+
+    @Override
+    public void disconnected(Controller controller) {}
 }

@@ -19,7 +19,7 @@ public class Player {
     private final Animation<TextureRegion> reimuAnimation;
     private float animationTimer;
 
-    public Player(int positionX, int positionY, String path) {
+    public Player(float positionX, float positionY, String path) {
 
         textureRegion = new TextureRegion(new Texture(path));
         bounds = new Rectangle(

@@ -66,10 +66,10 @@ public class Main extends ApplicationAdapter implements ControllerListener {
 
         sound = Gdx.audio.newSound(Gdx.files.internal("sounds/magic.wav"));
 
-        player = new Player((int) (SCREEN_WIDTH / 2f), (int) (SCREEN_HEIGHT / 2f), "img/redbird.png");
+        player = new Player(SCREEN_WIDTH / 2f,  SCREEN_HEIGHT / 2f, "img/redbird.png");
         player2 = new Rectangle(SCREEN_WIDTH - 32, SCREEN_HEIGHT / 2f, 16, 96);
 
-        ball = new Rectangle(100, 100, 32, 32);
+        ball = new Rectangle(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 32, 32);
         ballVelocity = new Vector2(400, 400);
 
         colors = new Color[]{
@@ -152,7 +152,7 @@ public class Main extends ApplicationAdapter implements ControllerListener {
         else
             controller = Controllers.getCurrent();
 
-        if (gameState > 0 && (ball.x < 0 || ball.x > SCREEN_WIDTH - ball.width)) {
+        if ((gameState > 0 || gameState < -7) && (ball.x < 0 || ball.x > SCREEN_WIDTH - ball.width)) {
 
             ballVelocity.x *= -1;
             colorIndex = MathUtils.random(0, colors.length - 1);
@@ -163,7 +163,7 @@ public class Main extends ApplicationAdapter implements ControllerListener {
             colorIndex = MathUtils.random(0, colors.length - 1);
         }
 
-        if (player.bounds.overlaps(ball) || (gameState < 0 && player2.overlaps(ball))) {
+        if (player.bounds.overlaps(ball) || ((gameState < 0 && gameState > -7) && player2.overlaps(ball))) {
 
             ballVelocity.scl(-1);
 
@@ -208,7 +208,13 @@ public class Main extends ApplicationAdapter implements ControllerListener {
             }
         }
 
-        if (gameState >= 2 || gameState < -2) {
+        if (gameState == -7) {
+
+            score = 0;
+            ball.setPosition(SCREEN_WIDTH / 2f, SCREEN_HEIGHT /2f);
+        }
+
+        if (gameState >= 2 || gameState < -2 && gameState != -7) {
 
             ball.x += (int)(ballVelocity.x * deltaTime);
             ball.y += (int)(ballVelocity.y * deltaTime);
@@ -220,7 +226,7 @@ public class Main extends ApplicationAdapter implements ControllerListener {
         if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.F2) && gameState < 7)
             gameState++;
 
-        if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.F1) && gameState >= 0)
+        if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.F1) && gameState > -8)
             gameState--;
 
         if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.Q))
@@ -319,7 +325,7 @@ public class Main extends ApplicationAdapter implements ControllerListener {
             player.draw(shapeRenderer);
         }
 
-        if (gameState < 0)
+        if (gameState < 0 && gameState > -7)
             shapeRenderer.rect(player2.x, player2.y, player2.width, player2.height);
 
         if (gameState == -6) {
@@ -330,7 +336,7 @@ public class Main extends ApplicationAdapter implements ControllerListener {
 
         shapeRenderer.setColor(Color.WHITE);
 
-        if (gameState < -4)
+        if (gameState < -4 && gameState > -7)
             shapeRenderer.rectLine(SCREEN_WIDTH / 2f, SCREEN_HEIGHT, SCREEN_WIDTH / 2f, 0, 2);
 
         if (gameState < -1) {
@@ -367,7 +373,7 @@ public class Main extends ApplicationAdapter implements ControllerListener {
         if (gameState >= 4 || gameState < -3)
             font.draw(batch, String.valueOf(score), SCREEN_WIDTH / 2f - 150, SCREEN_HEIGHT - 25);
 
-        if (gameState < -3)
+        if (gameState < -3 && gameState > -7)
             font.draw(batch, String.valueOf(score2), SCREEN_WIDTH / 2f + 110, SCREEN_HEIGHT - 25);
 
         if (isGamePaused)
@@ -423,7 +429,7 @@ public class Main extends ApplicationAdapter implements ControllerListener {
         if (buttonCode == controller.getMapping().buttonR1 && gameState < 7)
             gameState++;
 
-        if (buttonCode == controller.getMapping().buttonL1 && gameState > -10)
+        if (buttonCode == controller.getMapping().buttonL1 && gameState > -8)
             gameState--;
 
         if (buttonCode == controller.getMapping().buttonStart)

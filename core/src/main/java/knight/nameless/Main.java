@@ -106,7 +106,7 @@ public class Main extends ApplicationAdapter implements ControllerListener {
         else
             controller = Controllers.getCurrent();
 
-        if (ball.x < 0 || ball.x > SCREEN_WIDTH - ball.width) {
+        if (gameState > 0 && (ball.x < 0 || ball.x > SCREEN_WIDTH - ball.width)) {
 
             ballVelocity.x *= -1;
             colorIndex = MathUtils.random(0, colors.length - 1);
@@ -117,7 +117,7 @@ public class Main extends ApplicationAdapter implements ControllerListener {
             colorIndex = MathUtils.random(0, colors.length - 1);
         }
 
-        if (player.bounds.overlaps(ball)) {
+        if (player.bounds.overlaps(ball) || (gameState < 0 && player2.overlaps(ball))) {
 
             ballVelocity.scl(-1);
 
@@ -126,6 +126,13 @@ public class Main extends ApplicationAdapter implements ControllerListener {
 
             if (gameState >= 4)
                 score++;
+        }
+
+        if (ball.x < - ball.width || ball.x > SCREEN_WIDTH) {
+
+            ball.x = SCREEN_WIDTH / 2f;
+            ball.y = SCREEN_HEIGHT / 2f;
+            ballVelocity.scl(-1);
         }
 
         if (gameState >= 2 || gameState < -2) {

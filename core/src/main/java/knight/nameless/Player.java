@@ -22,15 +22,18 @@ public class Player {
     public Player(int positionX, int positionY, String path) {
 
         textureRegion = new TextureRegion(new Texture(path));
-        bounds = new Rectangle(positionX, positionY, textureRegion.getRegionWidth(), textureRegion.getRegionHeight());
-
-        reimuRegion = new TextureRegion(new Texture("img/reimu-spritesheet.png"));
-
-        reimuBounds = new Rectangle(0, 0, reimuRegion.getRegionWidth() / 8f, reimuRegion.getRegionHeight());
+        bounds = new Rectangle(
+            positionX,
+            positionY,
+            textureRegion.getRegionWidth() * 3,
+            textureRegion.getRegionHeight() * 3
+        );
 
         birdsRegion = new TextureRegion(new Texture("img/red-bird-sprites.png"));
-
         birdsAnimation = makeAnimationByRegion(birdsRegion, 3, 0.15f);
+
+        reimuRegion = new TextureRegion(new Texture("img/reimu-spritesheet.png"));
+        reimuBounds = new Rectangle(0, 0, reimuRegion.getRegionWidth() / 8f, reimuRegion.getRegionHeight());
         reimuAnimation = makeAnimationByRegion(reimuRegion, 14, 0.04f);
     }
 

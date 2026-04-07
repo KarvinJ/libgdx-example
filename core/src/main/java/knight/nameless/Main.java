@@ -130,8 +130,8 @@ public class Main extends ApplicationAdapter implements ControllerListener {
 
         if (gameState >= 2 || gameState < -2) {
 
-            ball.x += ballVelocity.x * deltaTime;
-            ball.y += ballVelocity.y * deltaTime;
+            ball.x += (int)(ballVelocity.x * deltaTime);
+            ball.y += (int)(ballVelocity.y * deltaTime);
         }
     }
 
@@ -310,7 +310,7 @@ public class Main extends ApplicationAdapter implements ControllerListener {
     private void resetValues() {
 
         gameState = 1;
-        player.bounds.set(0, 0, 34 , 24);
+        player.bounds.set(0, 0, 34 * 3, 24 * 3);
         ball.setPosition(SCREEN_WIDTH / 2f - ball.width / 2f, SCREEN_HEIGHT / 2f);
         score = 0;
     }

@@ -166,7 +166,12 @@ public class Main extends ApplicationAdapter implements ControllerListener {
 
         if (player.bounds.overlaps(ball) || ((gameState < 0 && gameState > -7) && player2.overlaps(ball))) {
 
-            ballVelocity.scl(-1);
+            if (gameState > 0)
+                ballVelocity.scl(-1);
+            else if (gameState < 0 && gameState > -7)
+                ballVelocity.x *= -1;
+            else if (gameState == -8)
+                ballVelocity.y *= -1;
 
             if (gameState < 0 || gameState >= 3)
                 sound.play();

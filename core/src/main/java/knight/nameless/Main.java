@@ -24,8 +24,8 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 public class Main extends ApplicationAdapter implements ControllerListener {
 
-    private final int SCREEN_WIDTH = 1280;
-    private final int SCREEN_HEIGHT = 720;
+    private final int SCREEN_WIDTH = 1366;
+    private final int SCREEN_HEIGHT = 768;
     public OrthographicCamera camera;
     public ExtendViewport viewport;
     private Controller controller;
@@ -110,7 +110,7 @@ public class Main extends ApplicationAdapter implements ControllerListener {
         {
             positionX = 6;
 
-            for (int column = 0; column < 12; column++)
+            for (int column = 0; column < 13; column++)
             {
                 Brick actualBrick = new Brick(
                     new Rectangle(positionX, positionY, 102, 20),

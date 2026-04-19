@@ -150,8 +150,13 @@ public class Main extends ApplicationAdapter implements ControllerListener {
 
         if (controller != null && controller.isConnected())
             joystickControllers(deltaTime);
-        else
+        else {
+
             controller = Controllers.getCurrent();
+
+            if (controller != null)
+                controller.addListener(this);
+        }
 
         if ((gameState > 0 || gameState < -7) && (ball.x < 0 || ball.x > SCREEN_WIDTH - ball.width)) {
 

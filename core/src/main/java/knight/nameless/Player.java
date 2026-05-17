@@ -50,8 +50,12 @@ public class Player {
 
         Array<TextureRegion> animationFrames = new Array<>();
 
-        for (int i = 0; i < totalFrames; i++)
-            animationFrames.add(new TextureRegion(region, i * frameWidth, 0, frameWidth, region.getRegionHeight()));
+        for (int i = 0; i < totalFrames; i++) {
+
+            animationFrames.add(
+                new TextureRegion(region, i * frameWidth, 0, frameWidth, region.getRegionHeight())
+            );
+        }
 
         return new Animation<>(frameDuration, animationFrames);
     }
